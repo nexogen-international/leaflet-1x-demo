@@ -1,0 +1,127 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+
+<html>
+<head>
+    <title>Leaflet 1.x + PTV xServer 1 API + PTV Layers by NEXOGEN</title>
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <link href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map" />
+	<script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+	<script src="./js/Leaflet.TileLayer.WMSHeader.js"></script>
+    <script src="./js/Leaflet.NonTiledLayer.WMS.js"></script>
+    <script src="./js/Leaflet.PtvLayer.js"></script>
+    <script src="./config.js"></script>
+
+    <script>
+        // initialize leaflet
+        var map = new L.Map('map');
+
+        // set map viewport - try to read them from url parameters
+        var center = new L.LatLng(49.01, 8.4);
+        var zoom = 16;
+        map.setView(center, zoom);
+
+        var layers = ["ta"];
+                
+        // setting the urls
+		var xMapAttribution = '<a href="http://www.ptvgroup.com">PTV</a>, HERE';
+        var xMapUrl = window.serverUrl? window.serverUrl : '';
+		if (!xMapUrl) {
+            var popupMsg = 'Please provide your server URL in the<br>script code';
+
+            // add a marker in the given location,
+            // attach some popup content to it and open the popup
+            L.marker(center).addTo(map)
+                .bindPopup(popupMsg)
+                .openPopup();
+        }
+		
+		// setting the access tokens (API keys)
+		var token = window.apiKey? window.apiKey : '';
+        if (!token) {
+            var popupMsg = 'Please provide your API key in the<br>script code';
+
+            // add a marker in the given location,
+            // attach some popup content to it and open the popup
+            L.marker(center).addTo(map)
+                .bindPopup(popupMsg)
+                .openPopup();
+        }
+
+        // add the xServer layers
+        // set the layer groups for default and sandbox
+        var baseLayers = {
+            "PTV classic": getXMapBaseLayers("", token, xMapAttribution, map.getPanes().tilePane),
+            "PTV sandbox": getXMapBaseLayers("sandbox", token, xMapAttribution, map.getPanes().tilePane).addTo(map),
+            "PTV silkysand": getXMapBaseLayers("silkysand", token, xMapAttribution, map.getPanes().tilePane),
+            "PTV gravelpit": getXMapBaseLayers("gravelpit", token, xMapAttribution, map.getPanes().tilePane)
+        };
+
+        // add scale control
+        L.control.scale().addTo(map);
+
+        // add truck attributes
+        var ta = new L.PtvLayer.TruckAttributes(xMapUrl, {
+            zIndex: 2,
+            attribution: xMapAttribution,
+            token: token
+        });
+        ta.addTo(map);
+
+        // add layer selector
+        var overlays = {
+            "Truck Attributes": ta,
+        };
+        L.control.layers(baseLayers, overlays, {autoZIndex: false}).addTo(map);
+
+        // returns a layer group for xmap back- and foreground layers
+        function getXMapBaseLayers(style, token, attribution, pane) {
+            var background = L.TileLayer.wmsHeader(
+                xMapUrl +
+                '/WMS/GetTile/{style}' + '/{x}/{y}/{z}.png', {
+					token: token,
+                    style: (style ? 'xmap-' + style + '-bg' : 'xmap-ajaxbg'),
+                    minZoom: 0, maxZoom: 19, opacity: 1.0,
+                    attribution: attribution,
+                    subdomains: '1234'
+                },
+				[
+				  { header: 'Authorization', value: 'Bearer ' + token },
+				]);
+
+            var foreground = L.nonTiledLayer.wms(
+                xMapUrl +
+                '/WMS/WMS', {
+					minZoom: 0, maxZoom: 19, opacity: 1.0,
+					layers: style ? 'xmap-' + style + '-fg' : 'xmap-ajaxfg',
+					format: 'image/png', transparent: true,
+					attribution: attribution,
+					zIndex: 100,
+					pane: pane,
+					token: token
+				});
+
+            return L.layerGroup([background, foreground]);
+        } 
+
+    </script>
+</body>
+</html>
