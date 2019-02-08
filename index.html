@@ -23,6 +23,7 @@
 
 <body>
     <div id="map" />
+    <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.nontiledlayer@1.0.7/dist/NonTiledLayer.js"></script>
     <script src="https://ptv-logistics.github.io/Leaflet.PtvLayer/Leaflet.PtvLayer.js"></script>
@@ -94,7 +95,7 @@
 
         // returns a layer group for xmap back- and foreground layers
         function getXMapBaseLayers(style, token, attribution, pane) {
-            var background = L.TileLayer.wmsWithBearerToken(
+            var background = L.tileLayer.wms(
                 xMapUrl +
                 '/WMS/GetTile/{style}' + '/{x}/{y}/{z}.png', {
 					token: token,
@@ -105,7 +106,7 @@
                     token: token
                 });
 
-            var foreground = L.NonTiledLayer.wmsWithBearerToken(
+            var foreground = L.nonTiledLayer.wms(
                 xMapUrl +
                 '/WMS/WMS', {
 					minZoom: 0, maxZoom: 19, opacity: 1.0,
