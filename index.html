@@ -23,11 +23,11 @@
 
 <body>
     <div id="map" />
-	<script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
-	<script src="./js/Leaflet.TileLayer.WMSHeader.js"></script>
-    <script src="./js/Leaflet.NonTiledLayer.WMS.js"></script>
-    <script src="./js/Leaflet.PtvLayer.js"></script>
+    <script src="https://unpkg.com/leaflet.nontiledlayer@1.0.7/dist/NonTiledLayer.js"></script>
+    <script src="https://ptv-logistics.github.io/Leaflet.PtvLayer/Leaflet.PtvLayer.js"></script>
+    <script src="./js/Leaflet.PtvLayer.Nexogen.js"></script>
+    <script src="./js/Leaflet.WMSWithBearerToken.js"></script>
     <script src="./config.js"></script>
 
     <script>
@@ -94,20 +94,18 @@
 
         // returns a layer group for xmap back- and foreground layers
         function getXMapBaseLayers(style, token, attribution, pane) {
-            var background = L.TileLayer.wmsHeader(
+            var background = L.TileLayer.wmsWithBearerToken(
                 xMapUrl +
                 '/WMS/GetTile/{style}' + '/{x}/{y}/{z}.png', {
 					token: token,
                     style: (style ? 'xmap-' + style + '-bg' : 'xmap-ajaxbg'),
                     minZoom: 0, maxZoom: 19, opacity: 1.0,
                     attribution: attribution,
-                    subdomains: '1234'
-                },
-				[
-				  { header: 'Authorization', value: 'Bearer ' + token },
-				]);
+                    subdomains: '1234',
+                    token: token
+                });
 
-            var foreground = L.nonTiledLayer.wms(
+            var foreground = L.NonTiledLayer.wmsWithBearerToken(
                 xMapUrl +
                 '/WMS/WMS', {
 					minZoom: 0, maxZoom: 19, opacity: 1.0,
