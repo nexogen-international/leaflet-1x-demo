@@ -1,0 +1,2 @@
+var serverUrl = '';
+var apiKey = '';

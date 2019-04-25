@@ -3,7 +3,7 @@
 
 <html>
 <head>
-    <title>Leaflet 1.x + PTV xServer 1 API + PTV Layers by NEXOGEN</title>
+    <title>Leaflet 1.x integration with PTV xMapServer and NEXOGEN GIS</title>
     <meta content="yes" name="apple-mobile-web-app-capable">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
     <link href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" rel="stylesheet">
@@ -23,12 +23,10 @@
 
 <body>
     <div id="map" />
-    <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.nontiledlayer@1.0.7/dist/NonTiledLayer.js"></script>
-    <script src="https://ptv-logistics.github.io/Leaflet.PtvLayer/Leaflet.PtvLayer.js"></script>
-    <script src="./js/Leaflet.PtvLayer.Nexogen.js"></script>
-    <script src="./js/Leaflet.WMSWithBearerToken.js"></script>
+    <script src="https://unpkg.com/@nexogen-international/leaflet.ptvlayer@1.0.2/Leaflet.PtvLayer.js"></script>
+    <script src="https://unpkg.com/@nexogen-international/leaflet.tilelayer.wms.bearertokenauth@1.0.0/Leaflet.TileLayer.WMS.BearerTokenAuth.js"></script>
     <script src="./config.js"></script>
 
     <script>
@@ -70,10 +68,10 @@
         // add the xServer layers
         // set the layer groups for default and sandbox
         var baseLayers = {
-            "PTV classic": getXMapBaseLayers("", token, xMapAttribution, map.getPanes().tilePane),
-            "PTV sandbox": getXMapBaseLayers("sandbox", token, xMapAttribution, map.getPanes().tilePane).addTo(map),
-            "PTV silkysand": getXMapBaseLayers("silkysand", token, xMapAttribution, map.getPanes().tilePane),
-            "PTV gravelpit": getXMapBaseLayers("gravelpit", token, xMapAttribution, map.getPanes().tilePane)
+            "Classic": getXMapBaseLayers("", token, xMapAttribution, map.getPanes().tilePane),
+            "Sandbox": getXMapBaseLayers("sandbox", token, xMapAttribution, map.getPanes().tilePane).addTo(map),
+            "Silkysand": getXMapBaseLayers("silkysand", token, xMapAttribution, map.getPanes().tilePane),
+            "Gravelpit": getXMapBaseLayers("gravelpit", token, xMapAttribution, map.getPanes().tilePane)
         };
 
         // add scale control
