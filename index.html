@@ -1,12 +1,13 @@
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
+
 <head>
     <title>Leaflet 1.x integration with PTV xMapServer and NEXOGEN GIS</title>
     <meta content="yes" name="apple-mobile-web-app-capable">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-    <link href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" rel="stylesheet">
+    <link href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <style>
         body {
             padding: 0;
@@ -23,10 +24,12 @@
 
 <body>
     <div id="map" />
-    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <script src="https://unpkg.com/leaflet.nontiledlayer@1.0.7/dist/NonTiledLayer.js"></script>
     <script src="https://unpkg.com/@nexogen-international/leaflet.ptvlayer@1.0.2/Leaflet.PtvLayer.js"></script>
     <script src="https://unpkg.com/@nexogen-international/leaflet.tilelayer.wms.bearertokenauth@1.0.0/Leaflet.TileLayer.WMS.BearerTokenAuth.js"></script>
+    <script src="https://unpkg.com/@nexogen-international/leaflet.routing.nexogen@0.1.0/Leaflet.Routing.Nexogen.js"></script>
     <script src="./config.js"></script>
 
     <script>
@@ -34,16 +37,16 @@
         var map = new L.Map('map');
 
         // set map viewport - try to read them from url parameters
-        var center = new L.LatLng(49.01, 8.4);
-        var zoom = 16;
+        var center = new L.LatLng(47.46072, 18.95798);
+        var zoom = 8;
         map.setView(center, zoom);
 
         var layers = ["ta"];
-                
+
         // setting the urls
-		var xMapAttribution = '<a href="http://www.ptvgroup.com">PTV</a>, HERE';
-        var xMapUrl = window.serverUrl? window.serverUrl : '';
-		if (!xMapUrl) {
+        var xMapAttribution = '<a href="http://www.ptvgroup.com">PTV</a>, HERE';
+        var xMapUrl = window.serverUrl ? window.serverUrl : '';
+        if (!xMapUrl) {
             var popupMsg = 'Please provide your server URL in the<br>script code';
 
             // add a marker in the given location,
@@ -52,9 +55,9 @@
                 .bindPopup(popupMsg)
                 .openPopup();
         }
-		
-		// setting the access tokens (API keys)
-		var token = window.apiKey? window.apiKey : '';
+
+        // setting the access tokens (API keys)
+        var token = window.apiKey ? window.apiKey : '';
         if (!token) {
             var popupMsg = 'Please provide your API key in the<br>script code';
 
@@ -89,36 +92,56 @@
         var overlays = {
             "Truck Attributes": ta,
         };
-        L.control.layers(baseLayers, overlays, {autoZIndex: false}).addTo(map);
+        L.control.layers(baseLayers, overlays, { autoZIndex: false }).addTo(map);
+
+        // add routing
+        L.Routing.control({
+            addWaypoints: true,
+            waypoints: [
+                L.latLng(47.46072, 18.95798),
+                L.latLng(46.2530102, 20.1414253)
+            ],
+            router: L.Routing.nexogen({
+                baseUrl: serverUrl,
+                bearerToken: token,
+                vehicleProfile: 'Truck_40t',
+            }),
+            lineOptions: {
+                styles: [
+                    { color: '#0000F0', opacity: 0.5, weight: 7 }
+                ]
+            }
+        }).addTo(map);
 
         // returns a layer group for xmap back- and foreground layers
         function getXMapBaseLayers(style, token, attribution, pane) {
             var background = L.tileLayer.wms(
                 xMapUrl +
                 '/WMS/GetTile/{style}' + '/{x}/{y}/{z}.png', {
-					token: token,
-                    style: (style ? 'xmap-' + style + '-bg' : 'xmap-ajaxbg'),
-                    minZoom: 0, maxZoom: 19, opacity: 1.0,
-                    attribution: attribution,
-                    subdomains: '1234',
-                    token: token
-                });
+                token: token,
+                style: (style ? 'xmap-' + style + '-bg' : 'xmap-ajaxbg'),
+                minZoom: 0, maxZoom: 19, opacity: 1.0,
+                attribution: attribution,
+                subdomains: '1234',
+                token: token
+            });
 
             var foreground = L.nonTiledLayer.wms(
                 xMapUrl +
                 '/WMS/WMS', {
-					minZoom: 0, maxZoom: 19, opacity: 1.0,
-					layers: style ? 'xmap-' + style + '-fg' : 'xmap-ajaxfg',
-					format: 'image/png', transparent: true,
-					attribution: attribution,
-					zIndex: 100,
-					pane: pane,
-					token: token
-				});
+                minZoom: 0, maxZoom: 19, opacity: 1.0,
+                layers: style ? 'xmap-' + style + '-fg' : 'xmap-ajaxfg',
+                format: 'image/png', transparent: true,
+                attribution: attribution,
+                zIndex: 100,
+                pane: pane,
+                token: token
+            });
 
             return L.layerGroup([background, foreground]);
-        } 
+        }
 
     </script>
 </body>
+
 </html>
